@@ -150,4 +150,4 @@ jobs:
             git config --local user.email "${{ secrets.EMAIL}}"
             git add .
             git commit -m "[CI] Update Kubernetes deployment"
-            git push
+            git push 
