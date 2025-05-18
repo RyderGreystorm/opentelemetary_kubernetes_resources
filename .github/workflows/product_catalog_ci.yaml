@@ -140,8 +140,9 @@ jobs:
 
         - name: Update image in k8s
           run: |
-           echo "Updating image to: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}"
-           sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}|" kubernetes/productcatalog/deploy.yaml
+           IMAGE="${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}"
+           echo "Updating image to: $IMAGE"
+           sed -i "s|image: .*|image: $IMAGE|" kubernetes/productcatalog/deploy.yaml
 
         - name: commit and push changes
           run: |
