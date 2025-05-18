@@ -31,20 +31,17 @@ jobs:
         - name: Linting (golangci-lint)
           run: |
             go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-            cd src/product-catalog
             golangci-lint run --out-format=html > golangci-lint-report.html
         
         - name: Static Analysis with gosec
           run: |
             go install github.com/securego/gosec/v2/cmd/gosec@latest
-            cd src/product-catalog
             gosec -fmt=html -out=gosec-report.html ./...    
             gosec -fmt=json -out=gosec-report.json ./...
         
         - name: Dependency scan (OSV)
           run: |
             go install github.com/osv-scanner/osv-scanner/cmd/osv-scanner@latest
-            cd src/product-catalog
             osv-scanner --output=json > osv-report.json
             osv-scanner --output=html > osv-report.html
 
@@ -133,6 +130,9 @@ jobs:
 
       needs: docker-build
 
+      env:
+        DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}
+
       steps:
         - name: code-checkout
           uses: actions/checkout@v4
@@ -141,7 +141,8 @@ jobs:
 
         - name: Update image in k8s
           run: |
-            sed -i "s|image: .*|image: rydergreystorm/productcatalogservice:${{github.run_id}}|" kubernetes/productcatalog/deploy.yaml
+           echo "Updating image to: $DOCKER_IMAGE"
+           sed -i "s|image: .*|image: $DOCKER_IMAGE|" kubernetes/productcatalog/deploy.yaml
 
         - name: commit and push changes
           run: |
@@ -150,6 +151,3 @@ jobs:
             git add .
             git commit -m "[CI] Update Kubernetes deployment"
             git push
-          env:
-            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-            GITHUB_RUN_ID: ${{ github.run_id }} 
