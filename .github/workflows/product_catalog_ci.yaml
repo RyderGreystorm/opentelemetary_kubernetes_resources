@@ -28,10 +28,12 @@ jobs:
             go test -coverprofile=coverage.out ./...
             go tool cover -html=coverage.out -o coverage.html
 
-        - name: Linting (golangci-lint)
-          run: |
-            go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-            golangci-lint run --out-format=html > golangci-lint-report.html
+        - name: Run golangci-lint
+          uses: golangci/golangci-lint-action@v6
+          with:
+            version: v1.55.2
+            run: golangci-lint run
+            working-directory: src/product-catalog
         
         - name: Static Analysis with gosec
           run: |
@@ -132,6 +134,8 @@ jobs:
 
       env:
         DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}
+        ACTOR: ${{ secrets.REPO_ACTOR }}
+        EMAIL: ${{ secrets.EMAIL }}
 
       steps:
         - name: code-checkout
@@ -146,8 +150,8 @@ jobs:
 
         - name: commit and push changes
           run: |
-            git config --local user.name "${{ secrets.REPO_ACTOR }}"
-            git config --local user.email "${{ secrets.EMAIL}}"
+            git config --local user.name "$(REPO_ACTOR)"
+            git config --local user.email "$(EMAIL)"
             git add .
             git commit -m "[CI] Update Kubernetes deployment"
             git push
