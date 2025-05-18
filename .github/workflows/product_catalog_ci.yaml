@@ -151,4 +151,4 @@ jobs:
             git config --local user.email "biekrogodbless@gmail.com"
             git add kubernetes/productcatalog/deploy.yaml
             git commit -m "[CI] Update Kubernetes deployment"
-            git push origin HEAD:main
+            git push origin HEAD:main 
