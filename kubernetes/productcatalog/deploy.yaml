@@ -31,7 +31,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: productcatalogservice
-          image: 
+          image: rydergreystorm/productcatalogservice:15095662562
           imagePullPolicy: IfNotPresent
           ports:
             
