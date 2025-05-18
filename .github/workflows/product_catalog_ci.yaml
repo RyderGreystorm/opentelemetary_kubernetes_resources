@@ -150,8 +150,8 @@ jobs:
 
         - name: commit and push changes
           run: |
-            git config --local user.name "$(REPO_ACTOR)"
-            git config --local user.email "$(EMAIL)"
+            git config --local user.name "$REPO_ACTOR"
+            git config --local user.email "$EMAIL"
             git add .
             git commit -m "[CI] Update Kubernetes deployment"
             git push
