@@ -29,11 +29,10 @@ jobs:
             go tool cover -html=coverage.out -o coverage.html
 
         - name: Linting (golangci-lint)
-          uses: golangci/golangci-lint-action@v3
-          with:
-            version: latest
-            args: run --output-format > golangci-lint-report.html
-            output-format: html
+          run: |
+            go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+            cd src/product-catalog
+            golangci-lint run --out-format=html > golangci-lint-report.html
         
         - name: Static Analysis with gosec
           run: |
@@ -142,7 +141,7 @@ jobs:
 
         - name: Update image in k8s
           run: |
-            sed -i "s/image: .*/image: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}" kubernetes/productcatalog/deploy.yaml
+            sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}|" kubernetes/productcatalog/deploy.yaml
 
         - name: commit and push changes
           run: |
