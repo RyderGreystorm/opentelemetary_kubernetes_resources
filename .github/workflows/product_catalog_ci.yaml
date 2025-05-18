@@ -98,7 +98,7 @@ jobs:
 
         - name: build artifact
           run: |
-            cd src/productcatalog
+            cd src/product-catalog
             go mod download
             go build -o productcatalogservice main.go
 
