@@ -132,8 +132,6 @@ jobs:
 
       needs: docker-build
 
-      env:
-        DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}
       steps:
         - name: code-checkout
           uses: actions/checkout@v4
@@ -142,8 +140,8 @@ jobs:
 
         - name: Update image in k8s
           run: |
-           echo "Updating image to: $(DOCKER_IMAGE)"
-           sed -i "s|image: .*|image: $(DOCKER_IMAGE)|" kubernetes/productcatalog/deploy.yaml
+           echo "Updating image to: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}"
+           sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}|" kubernetes/productcatalog/deploy.yaml
 
         - name: commit and push changes
           run: |
