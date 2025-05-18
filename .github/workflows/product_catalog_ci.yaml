@@ -149,6 +149,11 @@ jobs:
           run: |
             git config --local user.name "Godbless Biekro"
             git config --local user.email "biekrogodbless@gmail.com"
+
+            git fetch origin
+            git checkout main
+            git pull origin main --rebase
+
             git add kubernetes/productcatalog/deploy.yaml
             git commit -m "[CI] Update Kubernetes deployment"
             git push origin HEAD:main 
