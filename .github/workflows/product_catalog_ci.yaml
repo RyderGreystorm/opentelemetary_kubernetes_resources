@@ -141,8 +141,8 @@ jobs:
 
         - name: Update image in k8s
           run: |
-           echo "Updating image to: $DOCKER_IMAGE"
-           sed -i "s|image: .*|image: $DOCKER_IMAGE|" kubernetes/productcatalog/deploy.yaml
+           echo "Updating image to: $(DOCKER_IMAGE)"
+           sed -i "s|image: .*|image: $(DOCKER_IMAGE)|" kubernetes/productcatalog/deploy.yaml
 
         - name: commit and push changes
           run: |
