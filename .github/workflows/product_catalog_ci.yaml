@@ -134,9 +134,6 @@ jobs:
 
       env:
         DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}
-        ACTOR: ${{ secrets.REPO_ACTOR }}
-        EMAIL: ${{ secrets.EMAIL }}
-
       steps:
         - name: code-checkout
           uses: actions/checkout@v4
@@ -150,8 +147,8 @@ jobs:
 
         - name: commit and push changes
           run: |
-            git config --local user.name "$REPO_ACTOR"
-            git config --local user.email "$EMAIL"
-            git add .
+            git config --local user.name "Godbless Biekro"
+            git config --local user.email "biekrogodbless@gmail.com"
+            git add kubernetes/productcatalog/deploy.yaml
             git commit -m "[CI] Update Kubernetes deployment"
             git push
