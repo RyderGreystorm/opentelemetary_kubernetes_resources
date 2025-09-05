@@ -17,70 +17,68 @@ jobs:
           with:
             go-version: 1.22
             cache: true
-            cache-dependency-path: src/productcatalog/go.mod
+            cache-dependency-path: src/product-catalog/go.mod
 
         - name: Run unit tests and coverage
           run: |
-            cd src/productcatalog
+            cd src/product-catalog
             go mod download
             go vet ./...
             go test -v ./...
             go test -coverprofile=coverage.out ./...
             go tool cover -html=coverage.out -o coverage.html
 
-        - name: Linting (golangci-lint)
-          uses: golangci/golangci-lint-action@v3
+        - name: Run golangci-lint
+          uses: golangci/golangci-lint-action@v6
           with:
-            version: latest
-            args: run --output-format > golangci-lint-report.html
-            output-format: html
+            version: v1.55.2
+            run: golangci-lint run
+            working-directory: src/product-catalog
         
         - name: Static Analysis with gosec
           run: |
             go install github.com/securego/gosec/v2/cmd/gosec@latest
-            cd src/productcatalog
             gosec -fmt=html -out=gosec-report.html ./...    
             gosec -fmt=json -out=gosec-report.json ./...
         
         - name: Dependency scan (OSV)
           run: |
             go install github.com/osv-scanner/osv-scanner/cmd/osv-scanner@latest
-            cd src/productcatalog
             osv-scanner --output=json > osv-report.json
             osv-scanner --output=html > osv-report.html
 
         - name: Upload OSV report
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: osv-report
             path: |
-              src/productcatalog/osv-report.json
-              src/productcatalog/osv-report.html
+              src/product-catalog/osv-report.json
+              src/product-catalog/osv-report.html
             retention-days: 1
 
         - name: Upload gosec report
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: gosec-report
             path: |
-              src/productcatalog/gosec-report.json
-              src/productcatalog/gosec-report.html
+              src/product-catalog/gosec-report.json
+              src/product-catalog/gosec-report.html
             retention-days: 1
 
         - name: Upload coverage report
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: coverage-report
             path: |
-              src/productcatalog/coverage.html
-              src/productcatalog/coverage.out   
+              src/product-catalog/coverage.html
+              src/product-catalog/coverage.out   
             retention-days: 1
          
         - name: Upload golangci-lint report
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: golangci-lint-report
-            path: src/productcatalog/golangci-lint-report.*
+            path: src/product-catalog/golangci-lint-report.*
             retention-days: 1
         
     build:
@@ -98,7 +96,7 @@ jobs:
 
         - name: build artifact
           run: |
-            cd src/productcatalog
+            cd src/product-catalog
             go mod download
             go build -o productcatalogservice main.go
 
@@ -123,8 +121,8 @@ jobs:
         - name: build and push image
           uses: docker/build-push-action@v6
           with:
-            context: src/productcatalog
-            file: src/productcatalog/Dockerfile
+            context: src/product-catalog
+            file: src/product-catalog/Dockerfile
             push: true
             tags: |
               ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}
@@ -142,12 +140,19 @@ jobs:
 
         - name: Update image in k8s
           run: |
-            sed -i "s/image: .*/image: ${{ secrets.DOCKER_USERNAME }}/productcatalogservice:${{ github.run_id }}/" kubernetes/productcatalog/deploy.yaml
+           IMAGE="${{ vars.ORG_NAME }}/productcatalogservice:${{ github.run_id }}"
+           echo "Updating image to: $IMAGE"
+           sed -i "s|image: .*|image: $IMAGE|" kubernetes/productcatalog/deploy.yaml
 
         - name: commit and push changes
           run: |
-            git config --local user.name "${{ secrets.REPO_ACTOR }}"
-            git config --local user.email "${{ secrets.EMAIL}}"
-            git add .
+            git config --local user.name "Godbless Biekro"
+            git config --local user.email "biekrogodbless@gmail.com"
+
+            git fetch origin main
+            git checkout -b main origin/main
+            git add kubernetes/productcatalog/deploy.yaml
+
             git commit -m "[CI] Update Kubernetes deployment"
-            git push
+            git pull origin main --rebase
+            git push origin HEAD:main 
